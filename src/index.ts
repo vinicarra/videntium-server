@@ -8,10 +8,10 @@ import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
 import http from "http";
 import express from "express";
 import winston from "winston";
-import { createConnection, getConnection } from "typeorm";
+import { createConnection } from "typeorm";
 import { buildSchema } from "type-graphql";
-import { BookResolver } from "./core/resolvers/Book";
-import { Book } from "./core/entities/Book";
+import { UserResolver } from "./core/resolvers/UserResolver";
+import { ShowResolver } from "./core/resolvers/ShowResolver";
 
 const logger = winston.createLogger({
   transports: [
@@ -26,7 +26,7 @@ const startServer = async () => {
   const httpServer = http.createServer(app);
 
   const schema = await buildSchema({
-    resolvers: [BookResolver],
+    resolvers: [ShowResolver, UserResolver],
     emitSchemaFile: true,
     validate: false,
   });
@@ -43,16 +43,12 @@ const startServer = async () => {
     httpServer.listen({ port: process.env.SERVER_PORT }, resolve)
   );
   logger.info(
-    `Server's started at http://localhost:${process.env.SERVER_PORT}/graphql`
+    `Server started at http://localhost:${process.env.SERVER_PORT}/graphql`
   );
 };
 
 // Create database connection
-createConnection({
-  type: "postgres",
-  url: `postgres://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/${process.env.DB_NAME}`,
-  entities: ["src/**/*.ts"],
-})
+createConnection()
   .then(async () => {
     try {
       await startServer();
