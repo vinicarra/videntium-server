@@ -6,7 +6,7 @@
   "jsRules": {},
   "rules": {
     "trailing-comma": [ false ],
-    "variable-name": [true, "allow-leading-underscore", "allow-snake-case"]
+    "variable-name": [true, "allow-leading-underscore", "allow-snake-case", "allow-pascal-case"]
   },
   "rulesDirectory": []
 }
