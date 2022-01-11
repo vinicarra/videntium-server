@@ -7,22 +7,18 @@ import { ApolloServer } from "apollo-server-express";
 import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
 import http from "http";
 import express from "express";
-import winston from "winston";
+import bodyParser from "body-parser";
 import { createConnection } from "typeorm";
 import { buildSchema } from "type-graphql";
 import { UserResolver } from "./core/resolvers/UserResolver";
 import { ShowResolver } from "./core/resolvers/ShowResolver";
-
-const logger = winston.createLogger({
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: "combined.log" }),
-  ],
-});
+import { Logger } from "./core/utils/Logger";
+import { AuthController } from "./core/controllers/Auth";
 
 const startServer = async () => {
   const app = express();
   app.use(compression());
+  app.use(bodyParser.json());
   const httpServer = http.createServer(app);
 
   const schema = await buildSchema({
@@ -39,10 +35,13 @@ const startServer = async () => {
   await server.start();
   server.applyMiddleware({ app });
 
+  app.post("/auth/authorize", AuthController.authorize);
+  app.post("/auth/refresh", AuthController.refresh);
+
   await new Promise<void>((resolve) =>
     httpServer.listen({ port: process.env.SERVER_PORT }, resolve)
   );
-  logger.info(
+  Logger.getInstance().info(
     `Server started at http://localhost:${process.env.SERVER_PORT}/graphql`
   );
 };
@@ -53,9 +52,9 @@ createConnection()
     try {
       await startServer();
     } catch (e) {
-      logger.error("Failed to create server: " + e);
+      Logger.getInstance().error("Failed to create server: " + e);
     }
   })
   .catch((e) => {
-    logger.error("Failed to connect to database: " + e);
+    Logger.getInstance().error("Failed to connect to database: " + e);
   });
