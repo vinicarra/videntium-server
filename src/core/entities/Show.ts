@@ -7,16 +7,17 @@ import {
   ManyToMany,
   OneToMany,
   OneToOne,
-  PrimaryGeneratedColumn,
 } from "typeorm";
-import { IBaseEntity } from "./interfaces/IBaseEntity";
 import { Media } from "./Media";
 import { Genre } from "./Genre";
 import { Season } from "./Season";
+import { TypeormLoader } from "type-graphql-dataloader";
+import { IDisableEntity } from "./interfaces/IDisableEntity";
+import { IBaseEntity } from "./interfaces/IBaseEntity";
 
 @Entity("v_show")
-@ObjectType({ implements: IBaseEntity })
-export class Show extends IBaseEntity {
+@ObjectType({ implements: [IDisableEntity, IBaseEntity] })
+export class Show extends IDisableEntity {
   @Column()
   @Field()
   name!: string;
@@ -34,15 +35,16 @@ export class Show extends IBaseEntity {
   content_type!: number;
 
   @Field((type) => Media, { nullable: true })
-  @OneToOne(() => Media, { eager: true })
+  @OneToOne(() => Media)
   @JoinColumn({
     name: "media_id",
     referencedColumnName: "id",
   })
+  @TypeormLoader()
   media!: Media;
 
   @Field((type) => [Genre])
-  @ManyToMany(() => Genre, { eager: true })
+  @ManyToMany(() => Genre)
   @JoinTable({
     name: "v_show_genre",
     joinColumn: {
@@ -54,9 +56,11 @@ export class Show extends IBaseEntity {
       referencedColumnName: "id",
     },
   })
+  @TypeormLoader()
   genres!: Genre[];
 
   @Field((type) => [Season])
-  @OneToMany(() => Season, (season) => season.show, { eager: true })
+  @OneToMany(() => Season, (season) => season.show)
+  @TypeormLoader()
   seasons!: Season[];
 }

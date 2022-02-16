@@ -1,12 +1,14 @@
 import { Field, ObjectType } from "type-graphql";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
-import { IBaseEntity } from "./interfaces/IBaseEntity";
 import { Show } from "./Show";
 import { Episode } from "./Episode";
+import { TypeormLoader } from "type-graphql-dataloader";
+import { IDisableEntity } from "./interfaces/IDisableEntity";
+import { IBaseEntity } from "./interfaces/IBaseEntity";
 
 @Entity("v_season")
-@ObjectType({ implements: IBaseEntity })
-export class Season extends IBaseEntity {
+@ObjectType({ implements: [IDisableEntity, IBaseEntity] })
+export class Season extends IDisableEntity {
   @Field()
   @Column({ unique: true })
   pos!: number;
@@ -19,6 +21,7 @@ export class Season extends IBaseEntity {
   show!: Show;
 
   @Field((type) => [Episode])
-  @OneToMany(() => Episode, (episode) => episode.season, { eager: true })
+  @OneToMany(() => Episode, (episode) => episode.season)
+  @TypeormLoader()
   episodes!: Episode[];
 }

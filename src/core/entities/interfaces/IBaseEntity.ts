@@ -1,5 +1,9 @@
 import { Field, ID, InterfaceType } from "type-graphql";
-import { Column, PrimaryGeneratedColumn } from "typeorm";
+import {
+  CreateDateColumn,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
 @InterfaceType()
 export class IBaseEntity {
@@ -7,11 +11,11 @@ export class IBaseEntity {
   @Field((type) => ID)
   id!: string;
 
-  @Column("timestamptz")
+  @CreateDateColumn()
   @Field((type) => Date)
   created_at!: Date;
 
-  @Column("timestamptz")
+  @UpdateDateColumn()
   @Field((type) => Date)
   updated_at!: Date;
 }

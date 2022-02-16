@@ -19,6 +19,10 @@ export class ShowResolver {
       }
     );
 
+    const a = await getConnection().manager.find(Show);
+
+    Logger.getInstance().info(a);
+
     return {
       items,
       totalPages: Math.ceil(numberOfItems / limit),

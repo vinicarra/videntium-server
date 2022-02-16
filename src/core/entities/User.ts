@@ -1,18 +1,14 @@
 import { Field, ID, ObjectType } from "type-graphql";
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from "typeorm";
-import { IBaseEntity } from "./interfaces/IBaseEntity";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
 import { Role } from "./Role";
+import { TypeormLoader } from "type-graphql-dataloader";
+import { IDisableEntity } from "./interfaces/IDisableEntity";
+import { UserToken } from "./UserToken";
+import { IBaseEntity } from "./interfaces/IBaseEntity";
 
 @Entity("v_user")
-@ObjectType({ implements: IBaseEntity })
-export class User extends IBaseEntity {
+@ObjectType({ implements: [IDisableEntity, IBaseEntity] })
+export class User extends IDisableEntity {
   @Field()
   @Column()
   name!: string;
@@ -30,11 +26,17 @@ export class User extends IBaseEntity {
   profile_picture!: string;
 
   @Field((type) => [Role])
-  @ManyToMany(() => Role, { eager: true })
+  @ManyToMany(() => Role)
   @JoinTable({
     name: "v_user_role",
     joinColumn: { name: "user_id", referencedColumnName: "id" },
     inverseJoinColumn: { name: "role_id", referencedColumnName: "id" },
   })
+  @TypeormLoader()
   roles!: Role[];
+
+  @Field((type) => [UserToken])
+  @OneToMany(() => UserToken, (userToken) => userToken.user)
+  @TypeormLoader()
+  refresh_tokens!: UserToken[];
 }
